@@ -10,7 +10,7 @@ public class Livelock {
         @Override
         public void run() {
             try {
-                while(true) {
+                while (true) {
                     if (LOCK_ONE.tryLock()) {
                         System.out.println("LOCK_ONE acquired by thread FIRST");
                         sleep(1000);
@@ -35,7 +35,7 @@ public class Livelock {
         public void run() {
             try {
                 sleep(500);
-                while(true) {
+                while (true) {
                     if (LOCK_TWO.tryLock()) {
                         System.out.println("LOCK_TWO acquired by thread SECOND");
                         sleep(1000);

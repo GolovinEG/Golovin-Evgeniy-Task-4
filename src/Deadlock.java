@@ -6,20 +6,20 @@ public class Deadlock {
     private static final Lock LOCK_TWO = new ReentrantLock();
 
     private static final Thread FIRST = new Thread() {
-      @Override
-      public void run() {
-          try {
-              LOCK_ONE.lock();
-              System.out.println("LOCK_ONE acquired by thread FIRST");
-              sleep(1000);
-              LOCK_TWO.lock();
-              System.out.println("LOCK_TWO acquired by thread FIRST");
-              LOCK_ONE.unlock();
-              LOCK_TWO.unlock();
-          } catch (InterruptedException e) {
-              throw new RuntimeException(e);
-          }
-      }
+        @Override
+        public void run() {
+            try {
+                LOCK_ONE.lock();
+                System.out.println("LOCK_ONE acquired by thread FIRST");
+                sleep(1000);
+                LOCK_TWO.lock();
+                System.out.println("LOCK_TWO acquired by thread FIRST");
+                LOCK_ONE.unlock();
+                LOCK_TWO.unlock();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     };
 
     private static final Thread SECOND = new Thread() {
