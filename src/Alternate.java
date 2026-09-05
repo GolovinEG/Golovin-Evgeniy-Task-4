@@ -1,45 +1,45 @@
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Alternate {
     private static final Lock LOCK = new ReentrantLock();
-    private static final Thread FIRST = new Thread() {
+    private static final Condition PRINT_DONE = LOCK.newCondition();
+    private static final int WAIT = 200;
+
+    private static int lastNumber = 2;
+
+    private static class AlternativeTask implements Runnable {
+        private final int order;
+
+        public AlternativeTask(int order) {
+            this.order = order;
+        }
+
         @Override
         public void run() {
             try {
+                Thread.sleep((long) WAIT * order);
                 while (true) {
-                    if (LOCK.tryLock(200, TimeUnit.MILLISECONDS)) {
-                        System.out.println(1);
-                        LOCK.unlock();
-                        sleep(300);
-                    }
+                    LOCK.lock();
+                    assert lastNumber != order : "Order error";
+                    System.out.println(order);
+                    lastNumber = order;
+                    PRINT_DONE.signal();
+                    PRINT_DONE.await();
                 }
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                System.err.println(e.getMessage());
+            } finally {
+                LOCK.unlock();
             }
         }
-    };
-    private static final Thread SECOND = new Thread() {
-        @Override
-        public void run() {
-            try {
-                sleep(100);
-                while (true) {
-                    if (LOCK.tryLock(200, TimeUnit.MILLISECONDS)) {
-                        System.out.println(2);
-                        LOCK.unlock();
-                        sleep(300);
-                    }
-                }
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    };
+    }
 
     public static void main(String[] args) {
-        FIRST.start();
-        SECOND.start();
+        Thread first = new Thread(new AlternativeTask(1));
+        Thread second = new Thread(new AlternativeTask(2));
+        first.start();
+        second.start();
     }
 }
